@@ -21,6 +21,7 @@ const (
 
 var (
     device  = flag.String("i", "", "interface")
+    statsd_address = flag.String("s", "", "statsd_address")
     snaplen = 65536
 )
 
@@ -28,11 +29,15 @@ func main() {
     expr := "port 53"
 
     flag.Usage = func() {
-        fmt.Fprintf(os.Stderr, "usage: %s [ -i interface ]\n", os.Args[0])
+        fmt.Fprintf(os.Stderr, "usage: %s [ -i interface ] [ -s statsd address ]\n", os.Args[0])
         os.Exit(1)
     }
 
     flag.Parse()
+
+    if (*statsd_address == "") {
+        flag.Usage()
+    }
 
     if *device == "" {
         devs, err := pcap.FindAllDevs()
@@ -62,7 +67,7 @@ func main() {
         statsd_namespace_prefix = fmt.Sprintf("%s.dnscollector.",hostname)
     }
 
-    go statsd_pollloop("localhost:5000")
+    go statsd_pollloop(*statsd_address)
 
     for pkt, r := h.NextEx(); r >= 0; pkt, r = h.NextEx() {
         if r == 0 {

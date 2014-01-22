@@ -1,6 +1,8 @@
 dnscollector
 ============
 
+A small daemon that counts DNS queries and publishes them to statsd. It uses libpcap to listen for traffic on the specified interface on port 53, and pushes a counter out to the speicified statsd address every 10s.
+
 Build
 -----
 

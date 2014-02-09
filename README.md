@@ -1,7 +1,14 @@
 dnscollector
 ============
 
-A small daemon that counts DNS queries and publishes them to statsd. It uses libpcap to listen for traffic on the specified interface on port 53, and pushes a counter out to the speicified statsd address every 10s.
+A small daemon that counts DNS queries and publishes them, along with the total byte size of the responses to statsd. It uses libpcap to listen for traffic on the specified interface on port 53, and pushes a counter out to the speicified statsd address every 10s.
+
+For each query name / type combination that is seen, `dnscollector` will publish two counter values every 10 seconds:
+
+    hostname.dnscollector.com,example,www.A_count:10|c
+    hostname.dnscollector.com,example,www.A_bytes:493|c
+
+It will also replace the '.' character in the query name with a comma - this is to help with keeping the name as a single graphite key.
 
 Dependencies
 ------------

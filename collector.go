@@ -86,6 +86,7 @@ func main() {
             // timeout, continue
             continue
         }
+        fmt.Println(pkt.Len)
         pkt.Decode()
         if (*verbose) {
             fmt.Println(pkt)
@@ -97,6 +98,7 @@ func main() {
                 domainparts := strings.Split(strings.ToLower(msg.Question[i].Name), ".")
                 domainparts = flipstringslice(domainparts)
                 domainname := strings.Join(domainparts, ".")
+                domainname = strings.Replace(domainname, ".", ",", -1)
                 dnstype := strings.ToUpper(dns.TypeToString[msg.Question[i].Qtype])
                 if (*verbose) {
                     fmt.Printf("name: %s type: %s\n", domainname, dnstype)
@@ -105,6 +107,9 @@ func main() {
                 countermap.Lock()
                 countermap.m[key]++
                 countermap.Unlock()
+                bytesmap.Lock()
+                bytesmap.m[key]+=pkt.Len
+                bytesmap.Unlock()
             }
         }
     }

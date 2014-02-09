@@ -5,7 +5,7 @@ import (
     "flag"
     "fmt"
     "os"
-    "github.com/miekg/pcap"
+    "github.com/growse/pcap"
     "github.com/miekg/dns"
 )
 
@@ -68,6 +68,11 @@ func main() {
         return
     }
 
+    derr := h.SetDirection("out")
+    if derr != nil {
+        fmt.Println("tcpdump:", derr)
+    }
+
     ferr := h.SetFilter(expr)
     if ferr != nil {
         fmt.Println("tcpdump:", ferr)
@@ -87,17 +92,19 @@ func main() {
             continue
         }
         pkt.Decode()
-        if (*verbose) {
-            fmt.Println(pkt)
-        }
         msg := new(dns.Msg)
         err := msg.Unpack(pkt.Payload)
-        if (err == nil) {
+        // We only want packets which have been successfully unpacked 
+        // and have at least one answer
+        if (err == nil && len(msg.Answer) > 0) {
+            if (*verbose) {
+                fmt.Println(pkt)
+            }
             for i := range(msg.Question) {
                 domainparts := strings.Split(strings.ToLower(msg.Question[i].Name), ".")
                 domainparts = flipstringslice(domainparts)
                 domainname := strings.Join(domainparts, ".")
-                domainname = strings.Replace(domainname, ".", ",", -1)
+                domainname = strings.Replace(domainname, ".", ">", -1)
                 dnstype := strings.ToUpper(dns.TypeToString[msg.Question[i].Qtype])
                 if (*verbose) {
                     fmt.Printf("name: %s type: %s\n", domainname, dnstype)

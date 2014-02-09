@@ -86,7 +86,6 @@ func main() {
             // timeout, continue
             continue
         }
-        fmt.Println(pkt.Len)
         pkt.Decode()
         if (*verbose) {
             fmt.Println(pkt)

@@ -40,7 +40,7 @@ func statsd_pollloop(address string) {
     con, err = net.DialUDP("udp", nil, serverAddr)
     countermap.m = make(map[string]int)
     if err != nil {
-        fmt.Printf("Error connecting to %s: %s", address, err)
+        fmt.Fprintf(os.Stderr, "Error connecting to %s: %s\n", address, err)
         os.Exit(1)
     } else {
         for {

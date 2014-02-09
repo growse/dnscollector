@@ -1,6 +1,7 @@
 package main
 
 import (
+    "strings"
     "flag"
     "fmt"
     "os"
@@ -22,14 +23,25 @@ const (
 var (
     device  = flag.String("i", "", "interface")
     statsd_address = flag.String("s", "", "statsd_address")
+    verbose = flag.Bool("v", false, "verbose")
     snaplen = 65536
 )
+
+func flipstringslice(s []string) []string {
+    for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+        s[i], s[j] = s[j], s[i]
+    }
+    if (len(s[0]) == 0) {
+        s = s[1:]
+    }
+    return s
+}
 
 func main() {
     expr := "port 53"
 
     flag.Usage = func() {
-        fmt.Fprintf(os.Stderr, "usage: %s [ -i interface ] [ -s statsd address ]\n", os.Args[0])
+        fmt.Fprintf(os.Stderr, "usage: %s [ -i interface ] [ -s statsd address ] [ -v ]\n", os.Args[0])
         os.Exit(1)
     }
 
@@ -75,13 +87,21 @@ func main() {
             continue
         }
         pkt.Decode()
-        fmt.Println(pkt)
+        if (*verbose) {
+            fmt.Println(pkt)
+        }
         msg := new(dns.Msg)
         err := msg.Unpack(pkt.Payload)
         if (err == nil) {
             for i := range(msg.Question) {
-                fmt.Printf("name: %s type: %s\n", msg.Question[i].Name,dns.TypeToString[msg.Question[i].Qtype])
-                key := fmt.Sprintf("%s%s", msg.Question[i].Name, dns.TypeToString[msg.Question[i].Qtype])
+                domainparts := strings.Split(strings.ToLower(msg.Question[i].Name), ".")
+                domainparts = flipstringslice(domainparts)
+                domainname := strings.Join(domainparts, ".")
+                dnstype := strings.ToUpper(dns.TypeToString[msg.Question[i].Qtype])
+                if (*verbose) {
+                    fmt.Printf("name: %s type: %s\n", domainname, dnstype)
+                }
+                key := fmt.Sprintf("%s.%s", domainname, dnstype)
                 countermap.Lock()
                 countermap.m[key]++
                 countermap.Unlock()

@@ -26,8 +26,8 @@ in the go project directory, and the executable should be output in the bin dire
 Usage
 -----
 
-`dnscollector` takes two arguments:
+`dnscollector` takes three arguments:
 
-    dnscollector -i <interface> -s <statsd_address>:<statsd_port>
+    dnscollector -i <interface> -s <statsd_address>:<statsd_port> -v
 
-It will then listen for TCP and UDP packets on port 53 on `interface` and publish periodic statistics to `statsd_address` on `statsd_port`.
+It will then listen for TCP and UDP packets on port 53 on `interface` and publish periodic statistics to `statsd_address` on `statsd_port`. If `-v` is specified, it will print to `stdout` details of packets that it sees and the parsed DNS information from them.

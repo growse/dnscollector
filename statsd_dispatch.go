@@ -1,6 +1,7 @@
 package main
 
 import (
+    "os"
     "time"
     "sync"
     "net"
@@ -39,7 +40,8 @@ func statsd_pollloop(address string) {
     con, err = net.DialUDP("udp", nil, serverAddr)
     countermap.m = make(map[string]int)
     if err != nil {
-        fmt.Println(err)
+        fmt.Printf("Error connecting to %s: %s", address, err)
+        os.Exit(1)
     } else {
         for {
             time.Sleep(10 * time.Second)

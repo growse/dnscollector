@@ -38,3 +38,9 @@ Usage
     dnscollector -i <interface> -s <statsd_address>:<statsd_port> -v
 
 It will then listen for TCP and UDP packets on port 53 on `interface` and publish periodic statistics to `statsd_address` on `statsd_port`. If `-v` is specified, it will print to `stdout` details of packets that it sees and the parsed DNS information from them.
+
+
+License
+-------
+
+`dnscollector` is licensed under the BSD 3-clause license. See `LICENSE` for details.

@@ -1,12 +1,15 @@
 package main
 
 import (
+    "log"
+    "net"
     "strings"
     "flag"
     "fmt"
     "os"
     "github.com/growse/pcap"
     "github.com/miekg/dns"
+    "github.com/abh/geoip"
 )
 
 const (
@@ -39,7 +42,7 @@ func flipstringslice(s []string) []string {
 
 func main() {
     expr := "port 53"
-
+    expr = ""
     flag.Usage = func() {
         fmt.Fprintf(os.Stderr, "usage: %s [ -i interface ] [ -s statsd address ] [ -v ]\n", os.Args[0])
         os.Exit(1)
@@ -61,7 +64,6 @@ func main() {
         }
         *device = devs[0].Name
     }
-
     h, err := pcap.OpenLive(*device, int32(snaplen), true, 500)
     if h == nil {
         fmt.Fprintf(os.Stderr, "tcpdump:", err)
@@ -85,6 +87,14 @@ func main() {
     }
 
     go statsd_pollloop(*statsd_address)
+    geoasn, err := geoip.OpenType(geoip.GEOIP_ASNUM_EDITION)
+    if err != nil {
+        log.Fatal("Could not open geoip database")
+    }
+    geocountry, err := geoip.OpenType(geoip.GEOIP_COUNTRY_EDITION)
+    if err != nil {
+        log.Fatal("Could not open geoip database")
+    }
 
     for pkt, r := h.NextEx(); r >= 0; pkt, r = h.NextEx() {
         if r == 0 {
@@ -92,6 +102,22 @@ func main() {
             continue
         }
         pkt.Decode()
+        if len(pkt.Headers) > 0 {
+            ipHdr, ipOk := pkt.Headers[0].(*pcap.Iphdr)
+            if ipOk {
+                //ip := fmt.Sprintf("%d.%d.%d.%d", ipHdr.DestIp[0],ipHdr.DestIp[1],ipHdr.DestIp[2],ipHdr.DestIp[3])
+                ip := net.IPv4(
+                    ipHdr.DestIp[0],
+                    ipHdr.DestIp[1],
+                    ipHdr.DestIp[2],
+                    ipHdr.DestIp[3],
+                ).String()
+                name, _ := geoasn.GetName(ip)
+                fmt.Println(name)
+                country, _ := geocountry.GetCountry(ip)
+                fmt.Println(country)
+            }
+        }
         msg := new(dns.Msg)
         err := msg.Unpack(pkt.Payload)
         // We only want packets which have been successfully unpacked 

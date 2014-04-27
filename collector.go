@@ -66,8 +66,7 @@ func main() {
     }
     h, err := pcap.OpenLive(*device, int32(snaplen), true, 500)
     if h == nil {
-        fmt.Fprintf(os.Stderr, "tcpdump:", err)
-        return
+        log.Fatal(fmt.Sprintf("tcpdump fatal error: %s", err))
     }
 
     derr := h.SetDirection("out")

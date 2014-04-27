@@ -1,19 +1,19 @@
 package main
 
 import (
-    "os"
-    "time"
-    "sync"
-    "net"
     "bytes"
-    "strconv"
     "fmt"
+    "net"
+    "os"
+    "strconv"
+    "sync"
+    "time"
 )
 
 var statsd_namespace_prefix string
 var con *net.UDPConn
 
-func statsd_dispatcher(counterdata map[string]uint32, bytesdata map[string]uint32) (error) {
+func statsd_dispatcher(counterdata map[string]uint32, bytesdata map[string]uint32) error {
     var record string
     var count uint32
     for record, count = range counterdata {
@@ -39,14 +39,14 @@ func statsd_dispatcher(counterdata map[string]uint32, bytesdata map[string]uint3
     return nil
 }
 
-var countermap = struct{
+var countermap = struct {
     sync.RWMutex
-    m map[string]uint32
+    m   map[string]uint32
 }{m: make(map[string]uint32)}
 
-var bytesmap = struct{
+var bytesmap = struct {
     sync.RWMutex
-    m map[string]uint32
+    m   map[string]uint32
 }{m: make(map[string]uint32)}
 
 var countersnapshot map[string]uint32
@@ -68,10 +68,10 @@ func statsd_pollloop(address string) {
             countermap.RLock()
             bytesmap.RLock()
 
-            for k,v := range(countermap.m) {
+            for k, v := range countermap.m {
                 countersnapshot[k] = v
             }
-            for k,v := range(bytesmap.m) {
+            for k, v := range bytesmap.m {
                 bytessnapshot[k] = v
             }
 

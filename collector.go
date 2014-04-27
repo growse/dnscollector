@@ -152,7 +152,10 @@ func main() {
                 if len(country) == 0 {
                     country = "none"
                 }
-                country = strings.Replace(country, ".", "{dot}", -1)
+                name = url.QueryEscape(name)
+
+                name = strings.Replace(name, ".", "%2E", -1)
+                country = strings.Replace(country, ".", "%2E", -1)
                 key := fmt.Sprintf("%s.%s.%s.%s", domainname, url.QueryEscape(name), country, dnstype)
                 if *verbose {
                     fmt.Println(key)

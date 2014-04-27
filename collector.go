@@ -27,6 +27,7 @@ var (
     device         = flag.String("i", "", "interface")
     statsd_address = flag.String("s", "", "statsd_address")
     verbose        = flag.Bool("v", false, "verbose")
+    dnsport        = flag.Int("p", 53, "dnsport")
     snaplen        = 65536
 )
 
@@ -41,13 +42,13 @@ func flipstringslice(s []string) []string {
 }
 
 func main() {
-    expr := "port 5300"
     flag.Usage = func() {
-        fmt.Fprintf(os.Stderr, "usage: %s [ -i interface ] [ -s statsd address ] [ -v ]\n", os.Args[0])
+        fmt.Fprintf(os.Stderr, "usage: %s [ -p dnsport ] [ -i interface ] [ -s statsd address ] [ -v ]\n", os.Args[0])
         os.Exit(1)
     }
 
     flag.Parse()
+    expr := fmt.Sprintf("port %d", *dnsport)
 
     if *statsd_address == "" {
         flag.Usage()

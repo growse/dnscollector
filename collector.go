@@ -147,12 +147,11 @@ func main() {
                 domainname = strings.Replace(domainname, ".", ">", -1)
                 dnstype := strings.ToUpper(dns.TypeToString[msg.Question[i].Qtype])
                 if len(name) == 0 {
-                    name = "n/a"
+                    name = "none"
                 }
                 if len(country) == 0 {
-                    country = "n/a"
+                    country = "none"
                 }
-                name = strings.Replace(name, ".", "{dot}", -1)
                 country = strings.Replace(country, ".", "{dot}", -1)
                 key := fmt.Sprintf("%s.%s.%s.%s", domainname, url.QueryEscape(name), country, dnstype)
                 if *verbose {

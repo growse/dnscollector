@@ -2,6 +2,7 @@ package main
 
 import (
     "flag"
+    "net/url"
     "fmt"
     "github.com/abh/geoip"
     "github.com/growse/pcap"
@@ -113,9 +114,6 @@ func main() {
             continue
         }
         pkt.Decode()
-        if *verbose {
-            fmt.Println(pkt)
-        }
         msg := new(dns.Msg)
         err := msg.Unpack(pkt.Payload)
         // We only want packets which have been successfully unpacked
@@ -156,10 +154,10 @@ func main() {
                 }
                 name = strings.Replace(name, ".", "{dot}", -1)
                 country = strings.Replace(country, ".", "{dot}", -1)
+                key := fmt.Sprintf("%s.%s.%s.%s", domainname, url.QueryEscape(name), country, dnstype)
                 if *verbose {
-                    fmt.Printf("name: %s type: %s asn %s country %s\n", domainname, dnstype, name, country)
+                    fmt.Println(key)
                 }
-                key := fmt.Sprintf("%s.%s.%s.%s", domainname, name, country, dnstype)
                 countermap.Lock()
                 countermap.m[key]++
                 countermap.Unlock()
